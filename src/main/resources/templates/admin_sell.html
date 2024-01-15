@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<th:block th:include="adminIndex :: adminHead"></th:block>
+    <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+</head>
+<style>
+	.checkN{
+		color: rgb(210, 45, 45);
+	}
+	
+	.checkY{
+		color: #4e73df;
+	}
+	
+	.image-preview-container{
+		position: fixed;
+		top: 50%;
+		right: 50%;
+		transform: translate(-53%, -50%);
+		z-index: 999;
+		background-color: #fff;
+		padding: 30px;
+		border: 1px solid #ccc;
+		border-radius: 10px;
+		width: 420px;
+	}
+	
+	.image-preview-container{
+		text-align: center;
+	}
+	
+	.image-cell:hover{
+		color: #4e73df;
+	}
+</style>
+<body id="page-top">
+
+    <div id="wrapper">
+
+		<th:block th:include="adminIndex :: adminnav"></th:block>
+
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+
+				<nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                    <!-- Sidebar Toggle (Topbar) -->
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+
+                    <!-- Topbar Navbar -->
+                    <ul class="navbar-nav ml-auto">
+                        <!-- Nav Item - User Information -->
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small" th:text="${adminUser != null ? adminUser : '이름없음'}"></span>
+                            </a>
+                        </li>
+
+                        <div class="topbar-divider d-none d-sm-block"></div>
+
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="dropdown-item nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                                data-toggle="modal" data-target="#logoutModal" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">
+                                    Logout
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                
+                <div class="container-fluid">
+
+                    <br><h1 class="h3 mb-2 text-gray-800">판매신청목록</h1><br>
+
+                    <div class="card shadow mb-4">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>번호</th>
+                                            <th>상품명</th>
+                                            <th>판매가격</th>
+                                            <th>바코드</th>
+                                            <th>바코드이미지</th>
+                                            <th>유효기간</th>
+                                            <th>신청일</th>
+                                            <th>판매자</th>
+                                            <th>승인</th>
+                                        </tr>
+                                    </thead>
+                                    <tfoot>
+                                        <tr>
+                                            <th>번호</th>
+                                            <th>상품명</th>
+                                            <th>판매가격</th>
+                                            <th>바코드</th>
+                                            <th>바코드이미지</th>
+                                            <th>유효기간</th>
+                                            <th>신청일</th>
+                                            <th>판매자</th>
+                                            <th>승인</th>
+                                        </tr>
+                                    </tfoot>
+                                    <tbody>
+                                        <tr th:each="sproduct : ${sproductList}">
+                                        	<td><a th:text="${sproduct.sseq}" th:href="@{'adminSellDetail=' + ${sproduct.sseq}}"></a></td>
+                                            <td th:text="${sproduct.product.productName}"></td>
+                                            <td th:text="${sproduct.sellingprice}"></td>
+                                            <td th:text="${sproduct.barcode}"></td>
+                                            <td th:text="${sproduct.barcode_image}" class="image-cell" th:data-image="${sproduct.barcode_image}" onmouseover="showImagePreview(this)" style="cursor: pointer;"></td>
+                                            <td th:text="${#dates.format(sproduct.valid, 'YYYY-MM-dd')}"></td>
+                                            <td th:text="${#dates.format(sproduct.regdate, 'YYYY-MM-dd HH:mm')}"></td>
+                                            <td th:text="${sproduct.member.name}"></td>
+                                            <td th:text="${sproduct.checkp == null ? '미승인' : '승인'}"
+                                            th:class="${sproduct.checkp == null ? 'checkN' : 'checkY'}"
+                                            class="approval-cell" th:data-sseq="${sproduct.sseq}"
+                                            th:data-checkp="${sproduct.checkp}"
+                                            onclick="toggleApproval(this)" style="cursor: pointer;"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <th:block th:include="adminIndex :: adminFooter"></th:block>
+
+        </div>
+
+    </div>
+
+    <th:block th:include="adminIndex :: adminPageUp"></th:block>
+ 	<th:block th:include="adminIndex :: adminModal"></th:block>
+ 	<script>
+	    function toggleApproval(cell) {
+			
+	        var sseq = cell.getAttribute('data-sseq');
+	        var currentApproval = cell.getAttribute('data-checkp');
+	        var newApproval = (currentApproval === 'Y') ? '' : 'Y';
+	
+			console.log(sseq);
+			console.log(currentApproval);
+			
+	        $.ajax({
+	            type: 'POST',
+	            url: '/updateCheckP', // 서버에서 해당 업데이트를 처리하는 엔드포인트로 변경
+	            data: {
+	                sseq: sseq,
+	                checkp: newApproval
+	            },
+	            success: function () {
+	                cell.textContent = (newApproval == 'Y') ? '승인' : '미승인';
+	                cell.setAttribute('data-checkp', newApproval);
+	                
+	                if(newApproval === 'Y'){
+						cell.classList.remove('checkN');
+						cell.classList.add('checkY');
+					}else{
+						cell.classList.remove('checkY');
+						cell.classList.add('checkN');
+					}
+	            },
+	            error: function () {
+	                console.error('서버 요청 실패');
+	            }
+	        });
+	    }
+	    
+    function showImagePreview(element) {
+        var imagePath = element.getAttribute('data-image');
+        console.log('Mouse Over!');
+        
+        var previewContainer = document.createElement('div');
+        previewContainer.className = 'image-preview-container';
+        
+        var previewImage = document.createElement('img');
+        previewImage.src = imagePath;
+        previewImage.style.maxWidth = '100%';
+        
+        previewContainer.appendChild(previewImage);
+        document.body.appendChild(previewContainer);
+        
+        element.addEventListener('mouseout', function() {
+            document.body.removeChild(previewContainer);
+        });
+    }
+	 </script>
+	<th:block th:include="adminIndex :: adminScript"></th:block>
+    <script src="vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script src="js/demo/datatables-demo.js"></script>
+</body>
+</html>

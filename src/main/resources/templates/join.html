@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+				xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+				layout:decorate="~{layout/default_layout}">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>네이버 회원가입 폼</title>
+<link rel="stylesheet" href="/css/join.css">
+</head>
+<body>
+<div layout:fragment="content" id="wrap">
+	<form method="post" action="/join" id="join">
+		<div class="member">
+			<div class="field">
+				<b>아이디</b> <span class="placehold-text"><input type="text"
+					id="id" name="id"> <input type="button" value="중복 체크"
+					id="idCheck" name="idCheck"> </span>
+			</div>
+			<div class="field">
+				<b>비밀번호</b> <input class="pwd" type="password" id="pwd" name="pwd">
+				<p class="sub" id="sub" name="sub">(영문, 숫자, 특수문자를 모두 포함하여
+					8자~16자로 입력해주세요.)</p>
+			</div>
+			<div class="field">
+				<b>비밀번호 재확인</b> <input class="pwdCheck" type="password"
+					id="pwdCheck" name="pwdCheck">
+			</div>
+			<div class="field">
+				<b>이름</b> <input type="text" id="name" name="name">
+			</div>
+			<div class="field">
+				<b>이메일</b> <input type="text" id="email" name="email"> <input
+					type="button" value="중복 체크" id="emailCheck" name="emailCheck">
+			</div>
+			<div class="field">
+				<b>전화번호</b> <input type="text" id="phone" name="phone">
+			</div>
+			<input type="submit" value="가입하기" onclick="return goSave();">
+		</div>
+	</form>
+	<script src="js/join.js"></script>
+	</div>
+</body>
+</html>
